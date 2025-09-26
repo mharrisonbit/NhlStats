@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getTeamById } from "../DataManager/DataManager";
 import { GameType } from "../Models/Enums";
 import { NHLTeamStats } from "../Models/NHLTeamStats";
 
@@ -39,29 +38,13 @@ export default function TeamStatsScreen() {
     return GameType[stats.gameType] || "Unknown";
   };
 
-  const showGoalieDetails = (goalie: any): void => {
-    alert(
-      `Goalie: ${goalie.firstName?.default + goalie.lastName?.default}\n` +
-        `Games: ${goalie.games}, Wins: ${goalie.wins}, Losses: ${goalie.losses}\n` +
-        `Goals Against Average: ${goalie.goalsAgainstAverage}, Save Percentage: ${goalie.savePercentage}`
-    );
-  };
-
-  const showPlayerDetails = (player: any): void => {
+  const showPlayerDetails = (player: any, type: string): void => {
     navigation.navigate("Screens/PlayerStatsScreen", {
-      stats: player,
+      skater: type === "skater" ? player : undefined,
+      goalie: type === "goalie" ? player : undefined,
       title:
         player.firstName.default + " " + player.lastName.default || undefined,
     });
-  };
-
-  const getSomeStats = async () => {
-    if (!stats?.gameType || !stats?.season) {
-      console.warn("Missing gameType or season, skipping getTeamById");
-      return;
-    }
-    let results = await getTeamById(stats.gameType, stats.season);
-    console.log("Fetched team by ID:", results);
   };
 
   if (!stats) {
@@ -84,7 +67,7 @@ export default function TeamStatsScreen() {
         {stats.skaters?.map((sk) => (
           <TouchableOpacity
             key={String(sk.playerId)}
-            onPress={() => showPlayerDetails(sk)}
+            onPress={() => showPlayerDetails(sk, "skater")}
           >
             <View key={String(sk.playerId)} style={styles.item}>
               <Text style={styles.itemName}>
@@ -105,7 +88,7 @@ export default function TeamStatsScreen() {
         {stats.goalies?.map((g) => (
           <TouchableOpacity
             key={String(g.playerId)}
-            onPress={() => showGoalieDetails(g)}
+            onPress={() => showPlayerDetails(g, "goalie")}
           >
             <View key={String(g.playerId)} style={styles.item}>
               <Text style={styles.itemName}>

@@ -1,36 +1,57 @@
 import { useRoute } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { StyleSheet, Text, View } from "react-native";
-import { Skater } from "../Models/NHLTeamStats";
+import { Goalie, Skater } from "../Models/NHLTeamStats";
 
 export default function PlayerStatsScreen() {
   const route = useRoute();
-  const params = (route as any).params as { stats?: Skater } | undefined;
-  const stats = params?.stats;
+  const params = (route as any).params as
+    | { skater?: Skater; goalie?: Goalie; title?: string }
+    | undefined;
+  const skater = params?.skater ?? null;
+  const goalie = params?.goalie ?? null;
 
-  return (
+  console.log("goalie", goalie);
+  console.log("skater", skater);
+
+  return skater ? (
     <View style={styles.container}>
       <Image
-        source={{ uri: stats?.headshot || "" }}
+        source={{ uri: skater?.headshot || "" }}
         style={{ width: 200, height: 200 }}
       />
-      <Text>Games Played: {stats?.gamesPlayed ?? "N/A"}</Text>
-      <Text>Goals: {stats?.goals ?? "N/A"}</Text>
-      <Text>Points: {stats?.points ?? "N/A"}</Text>
-      <Text>Game Winning Goals: {stats?.gameWinningGoals ?? "N/A"}</Text>
-      <Text>Power Play Goals: {stats?.powerPlayGoals ?? "N/A"}</Text>
-      <Text>Shorthanded Goals: {stats?.shorthandedGoals ?? "N/A"}</Text>
-      <Text>Overtime Goals: {stats?.overtimeGoals ?? "N/A"}</Text>
-      <Text>Shots: {stats?.shots ?? "N/A"}</Text>
-      <Text>Shooting Percentage: {stats?.shootingPctg ?? "N/A"}</Text>
-      <Text>Assists: {stats?.assists ?? "N/A"}</Text>
-      <Text>Penalty Minutes: {stats?.penaltyMinutes ?? "N/A"}</Text>
+      <Text>Games Played: {skater?.gamesPlayed ?? "N/A"}</Text>
+      <Text>Goals: {skater?.goals ?? "N/A"}</Text>
+      <Text>Points: {skater?.points ?? "N/A"}</Text>
+      <Text>Game Winning Goals: {skater?.gameWinningGoals ?? "N/A"}</Text>
+      <Text>Power Play Goals: {skater?.powerPlayGoals ?? "N/A"}</Text>
+      <Text>Shorthanded Goals: {skater?.shorthandedGoals ?? "N/A"}</Text>
+      <Text>Overtime Goals: {skater?.overtimeGoals ?? "N/A"}</Text>
+      <Text>Shots: {skater?.shots ?? "N/A"}</Text>
+      <Text>Shooting Percentage: {skater?.shootingPctg ?? "N/A"}</Text>
+      <Text>Assists: {skater?.assists ?? "N/A"}</Text>
+      <Text>Penalty Minutes: {skater?.penaltyMinutes ?? "N/A"}</Text>
       <Text>
-        Avg Time On Ice Per Game: {stats?.avgTimeOnIcePerGame ?? "N/A"}
+        Avg Time On Ice Per Game: {skater?.avgTimeOnIcePerGame ?? "N/A"}
       </Text>
-      <Text>Avg Shifts Per Game: {stats?.avgShiftsPerGame ?? "N/A"}</Text>
-      <Text>Faceoff Win Percentage: {stats?.faceoffWinPctg ?? "N/A"}</Text>
-      <Text>Plus/Minus: {stats?.plusMinus ?? "N/A"}</Text>
+      <Text>Avg Shifts Per Game: {skater?.avgShiftsPerGame ?? "N/A"}</Text>
+      <Text>Faceoff Win Percentage: {skater?.faceoffWinPctg ?? "N/A"}</Text>
+      <Text>Plus/Minus: {skater?.plusMinus ?? "N/A"}</Text>
+    </View>
+  ) : (
+    <View style={styles.container}>
+      <Image
+        source={{ uri: goalie?.headshot || "" }}
+        style={{ width: 200, height: 200 }}
+      />
+      <Text>Games: {goalie?.games ?? "N/A"}</Text>
+      <Text>Wins: {goalie?.wins ?? "N/A"}</Text>
+      <Text>Losses: {goalie?.losses ?? "N/A"}</Text>
+      <Text>Goals Against Average: {goalie?.goalsAgainstAverage ?? "N/A"}</Text>
+      <Text>Save Percentage: {goalie?.savePercentage ?? "N/A"}</Text>
+      <Text>Shutouts: {goalie?.shutouts ?? "N/A"}</Text>
+      <Text>Saves: {goalie?.saves ?? "N/A"}</Text>
+      <Text>Shots Against: {goalie?.shotsAgainst ?? "N/A"}</Text>
     </View>
   );
 }
@@ -44,23 +65,3 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 });
-//  playerId?:            number;
-//     headshot?:            string;
-//     firstName?:           FirstName;
-//     lastName?:            LastName;
-//     positionCode?:        PositionCode;
-//     gamesPlayed?:         number;
-//     goals?:               number;
-//     assists?:             number;
-//     points?:              number;
-//     plusMinus?:           number;
-//     penaltyMinutes?:      number;
-//     powerPlayGoals?:      number;
-//     shorthandedGoals?:    number;
-//     gameWinningGoals?:    number;
-//     overtimeGoals?:       number;
-//     shots?:               number;
-//     shootingPctg?:        number;
-//     avgTimeOnIcePerGame?: number;
-//     avgShiftsPerGame?:    number;
-//     faceoffWinPctg?:      number;
