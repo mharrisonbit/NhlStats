@@ -1,112 +1,163 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { ThemedView } from "@/components/themed-view";
+import Separator from "@/components/ui/Separator";
+import TrackerButton from "@/components/ui/TrackerButton";
+import { usePopup } from "@/components/ui/usePopup";
+import { useIsFocused } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { getGlossaryInfo } from "../DataManager/DataManager";
+import { NHLGlossary } from "../Models/NHLGlossary";
 
 export default function TabTwoScreen() {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isFocused = useIsFocused();
+  const [glossary, setGlossary] = useState<NHLGlossary | null>(null);
+  const [searchText, onChangeText] = useState("");
+  const fetchedRef = useRef(false);
+  const { showPopup } = usePopup();
+
+  useEffect(() => {
+    if (isFocused && !fetchedRef.current && !glossary) {
+      fetchedRef.current = true;
+      (async () => {
+        const data = await getGlossaryInfo();
+        if (data) setGlossary(data);
+      })();
+    }
+  }, [isFocused, glossary]);
+
+  const searchGlossary = (query: string) => {
+    if (!glossary || !query.trim()) {
+      alert("Please enter a search term.");
+      return;
+    }
+    const lowerQuery = query.toLowerCase();
+    const results = glossary.data.filter(
+      (item: any) =>
+        item.fullName.toLowerCase().includes(lowerQuery) ||
+        item.abbreviation.toLowerCase().includes(lowerQuery) ||
+        item.definition.toLowerCase().includes(lowerQuery)
+    );
+    if (results.length === 0) {
+      alert("No results found.");
+    } else {
+      const result = results[0];
+      let foundItemIndex = glossary.data.findIndex(
+        (i: any) => i.id === result.id
+      );
+      if (foundItemIndex !== -1 && scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({
+          y: foundItemIndex * 28, // Assuming each item is approximately 40px tall
+          animated: true,
+        });
+      }
+      showPopup({
+        title: `${result.abbreviation} • ${result.fullName}`,
+        message: result.definition,
+        buttons: [{ text: "Close" }],
+      });
+      onChangeText("");
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.searchField}>
+        <TextInput
+          style={styles.input}
+          onChangeText={onChangeText}
+          value={searchText}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        <TrackerButton
+          buttonStyle={styles.searchButton}
+          title="search"
+          onPress={() => {
+            searchGlossary(searchText);
+          }}
         />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+      </View>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        <ThemedView style={styles.titleContainer}>
+          <Text style={styles.info}>
+            {glossary &&
+              glossary.data.map((item: any) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() =>
+                    showPopup({
+                      title: `${item.abbreviation} • ${item.fullName}`,
+                      message: item.definition,
+                      buttons: [{ text: "Close" }],
+                    })
+                  }
+                >
+                  <Text>
+                    {item.abbreviation}: {item.fullName}
+                  </Text>
+                  <Separator />
+                </TouchableOpacity>
+              ))}
+          </Text>
+        </ThemedView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  safeArea: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 16,
   },
   titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+    padding: 16,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  info: {
+    fontSize: 14,
+    color: "#666",
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    width: "70%",
+  },
+  searchButton: {
+    width: "30%",
+  },
+  searchField: {
+    justifyContent: "space-evenly",
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 5,
+    paddingRight: 35,
+    width: "100%",
   },
 });
