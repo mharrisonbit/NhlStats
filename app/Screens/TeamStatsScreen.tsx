@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { getTeamById } from "../DataManager/DataManager";
-import { GameType } from "../Models/GameType";
+import { GameType } from "../Models/Enums";
 import { NHLTeamStats } from "../Models/NHLTeamStats";
 
 export default function TeamStatsScreen() {
