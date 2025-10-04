@@ -1,47 +1,16 @@
+import ModalImage from "@/components/ui/ModalImage";
 import { useRoute } from "@react-navigation/native";
-import { Image } from "expo-image";
-import { useState } from "react";
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import usePlayerStatsViewModel from "../ViewModels/PlayerStatsViewModel";
 
 export default function PlayerStatsScreen() {
   const route = useRoute();
-  const [modalVisible, setModalVisible] = useState(false);
-
   const { goalie, skater, positionName, imageUri } =
     usePlayerStatsViewModel(route);
 
-  const renderImage = () => (
-    <>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />
-      </TouchableOpacity>
-
-      <Modal visible={modalVisible} transparent={true}>
-        <Pressable
-          onPress={() => setModalVisible(false)}
-          style={styles.modalBackground}
-        >
-          <Image
-            source={{ uri: imageUri }}
-            style={styles.modalImage}
-            contentFit="contain"
-          />
-        </Pressable>
-      </Modal>
-    </>
-  );
-
   return (
     <View style={styles.container}>
-      {renderImage()}
+      <ModalImage imageUri={imageUri} />
       {skater ? (
         <>
           <Text>Games Played: {skater?.gamesPlayed ?? "N/A"}</Text>
@@ -96,15 +65,5 @@ const styles = StyleSheet.create({
     alignContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalImage: {
-    width: 300,
-    height: 300,
   },
 });
