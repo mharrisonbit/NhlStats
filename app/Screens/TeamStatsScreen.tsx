@@ -1,7 +1,5 @@
 import { ThemedView } from "@/components/themed-view";
-import RootStackParamList from "@/Navigation/navigation";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useRoute } from "@react-navigation/native";
 import React from "react";
 import {
   ScrollView,
@@ -10,42 +8,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { GameType } from "../Models/Enums";
 import { NHLTeamStats } from "../Models/NHLTeamStats";
+import useTeamStatsViewModel from "../ViewModels/TeamStatsViewModel";
 
 export default function TeamStatsScreen() {
   const route = useRoute();
   const params = (route as any).params as { stats?: NHLTeamStats } | undefined;
-  const stats = params?.stats;
 
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const formatSeason = (): string => {
-    if (!stats?.season || stats.season.length !== 8) {
-      return "N/A";
-    }
-
-    const startYear = stats.season.substring(0, 4);
-    const endYear = stats.season.substring(4);
-    return `${startYear}-${endYear}`;
-  };
-
-  const formatGameType = (): string => {
-    if (!stats?.gameType) {
-      return "N/A";
-    }
-    return GameType[stats.gameType] || "Unknown";
-  };
-
-  const showPlayerDetails = (player: any, type: string): void => {
-    navigation.navigate("Screens/PlayerStatsScreen", {
-      skater: type === "skater" ? player : undefined,
-      goalie: type === "goalie" ? player : undefined,
-      title:
-        player.firstName.default + " " + player.lastName.default || undefined,
-    });
-  };
+  const { stats, formatSeason, formatGameType, showPlayerDetails } =
+    useTeamStatsViewModel(params?.stats);
 
   if (!stats) {
     return (
@@ -57,7 +28,6 @@ export default function TeamStatsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {/* <Button title="Press me" onPress={() => getSomeStats()} /> */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={styles.title}>Season: {formatSeason()}</Text>
         <Text style={styles.subtitle}>Game type: {formatGameType()}</Text>

@@ -14,3 +14,11 @@ export enum GameType {
   OverseasExhibitions = 18,
   FourNations = 19,
 }
+
+export enum PostionCode {
+  "G" = "Goalie",
+  "D" = "Defenseman", 
+  "RW" = "Right Wing",
+  "LW" = "Left Wing",
+  "C" = "Center",
+}

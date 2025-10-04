@@ -3,45 +3,24 @@ import { ThemedView } from "@/components/themed-view";
 import CustomActivityIndicator from "@/components/ui/CustomActivityIndicator";
 import Separator from "@/components/ui/Separator";
 import TrackerButton from "@/components/ui/TrackerButton";
-import RootStackParamList from "@/Navigation/navigation";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getTeamByTricode, getTeams } from "../DataManager/DataManager";
-import { Datum, NHLTeam } from "../Models/NHLTeam";
+import useIndexViewModel from "../ViewModels/IndexViewModel";
 
 export default function HomeScreen() {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [currentTeams, setCurrentTeams] = useState<NHLTeam | undefined>();
+  const {
+    getTeamsforList,
+    buildTeamsList,
+    getTeamInfo,
+    isLoading,
+    isFocused,
+    currentTeams,
+  } = useIndexViewModel();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function buildTeamsList(): Promise<void> {
-    setIsLoading(true);
-    let results = await getTeams();
-    setCurrentTeams(results);
-    setIsLoading(false);
-  }
-
-  const getTeamInfo = async (team: Datum): Promise<void> => {
-    setIsLoading(true);
-    const tri = team.triCode || "";
-    let results = await getTeamByTricode(tri as string);
-    if (!results) {
-      alert("No data found for " + (team.fullName || "team"));
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(false);
-
-    navigation.navigate("Screens/TeamStatsScreen", {
-      stats: results,
-      title: team.fullName || undefined,
-    });
-  };
+  useEffect(() => {
+    getTeamsforList();
+  }, [isFocused]);
 
   return (
     <ParallaxScrollView

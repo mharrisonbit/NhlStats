@@ -1,37 +1,21 @@
-import { useIsFocused } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getTodaysWatchInfo } from "../DataManager/DataManager";
-import { NHLGameListing } from "../Models/NHLGameListing";
+import useGameListingViewModel from "../ViewModels/GameListingViewModel";
 
 export default function GameListings() {
-  const isFocused = useIsFocused();
-  const [gameListings, setGameListings] = useState<NHLGameListing | null>(null);
-
-  const fetchedRef = useRef(false);
+  const {
+    isFocused,
+    gameListings,
+    fetchedRef,
+    getListings,
+    formatShowTimes,
+    broadcastTapped,
+  } = useGameListingViewModel();
 
   useEffect(() => {
-    if ((isFocused && !fetchedRef.current) || gameListings === null) {
-      fetchedRef.current = true;
-      (async () => {
-        const data = await getTodaysWatchInfo(
-          new Date().toISOString().split("T")[0]
-        );
-        setGameListings(data);
-      })();
-    }
+    getListings();
   }, [isFocused, gameListings]);
-
-  const formatShowTimes = (
-    start: Date | undefined,
-    end: Date | undefined
-  ): string => {
-    if (!start || !end) return "N/A";
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    return `${startDate.toLocaleTimeString()} - ${endDate.toLocaleTimeString()}`;
-  };
 
   return (
     <ScrollView>
@@ -39,12 +23,14 @@ export default function GameListings() {
         <View style={{ padding: 16 }}>
           {gameListings?.broadcasts?.length ? (
             gameListings.broadcasts.map((broadcast, idx) => (
-              <View key={idx} style={{ marginBottom: 12 }}>
-                <Text>{broadcast.title}</Text>
-                <Text>{broadcast.description}</Text>
-                <Text>
-                  {formatShowTimes(broadcast.startTime, broadcast.endTime)}
-                </Text>
+              <View key={idx} style={styles.showListing}>
+                <View style={{ marginBottom: 12 }}>
+                  <Text>{broadcast.title}</Text>
+                  <Text>{broadcast.description}</Text>
+                  <Text>
+                    {formatShowTimes(broadcast.startTime, broadcast.endTime)}
+                  </Text>
+                </View>
               </View>
             ))
           ) : (
@@ -55,3 +41,12 @@ export default function GameListings() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  showListing: {
+    borderWidth: 1,
+    borderColor: "black",
+    padding: 10,
+    margin: 10,
+  },
+});
