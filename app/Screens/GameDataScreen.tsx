@@ -27,10 +27,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     margin: 10,
-    flexDirection: "column",
   },
   statMainContainer: {
-    flexDirection: "row",
     flex: 1,
   },
 });
