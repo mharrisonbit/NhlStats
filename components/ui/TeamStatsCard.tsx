@@ -18,7 +18,7 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
   const teamAbbr =
     team.abbreviation as keyof typeof gameData.currentStats.records;
 
-  // 🧠 Build combined stats, but preserve context for nested structures
+  //Pull stats data
   const records = gameData.currentStats?.records?.[teamAbbr] || {};
   const standings = gameData.currentStats?.standings?.[teamAbbr] || {};
   const streak = gameData.currentStats?.streaks?.[teamAbbr] || {};
@@ -50,10 +50,13 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
       : "N/A",
   };
 
-  // 🧹 Filter out empty or null values
   const statsEntries = Object.entries(combinedStats).filter(
     ([, value]) => value !== undefined && value !== null && value !== ""
   );
+
+  //Add goals for this team
+  const teamGoals =
+    gameData.goals?.filter((goal) => goal.team === teamAbbr) || [];
 
   return (
     <View style={[styles.container, style]}>
@@ -62,15 +65,37 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
       </Text>
 
       <View style={styles.statsGrid}>
-        {statsEntries.length > 0 ? (
-          statsEntries.map(([key, value]) => (
-            <View key={key} style={styles.statItem}>
-              <Text style={styles.statLabel}>{key}:</Text>
-              <Text style={styles.statValue}>{String(value)}</Text>
+        {statsEntries.map(([key, value]) => (
+          <View key={key} style={styles.statItem}>
+            <Text style={styles.statLabel}>{key}:</Text>
+            <Text style={styles.statValue}>{String(value)}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/*Goals Section */}
+      <View style={styles.goalsSection}>
+        <Text style={styles.sectionTitle}>Goals</Text>
+        {teamGoals.length > 0 ? (
+          teamGoals.map((goal, index) => (
+            <View key={index} style={styles.goalItem}>
+              <Text style={styles.goalScorer}>
+                {goal.scorer.player}{" "}
+                <Text style={styles.goalDetails}>
+                  (Period {goal.period}, {goal.min}:
+                  {goal.sec.toString().padStart(2, "0")}
+                  {goal.strength ? `, ${goal.strength}` : ""})
+                </Text>
+              </Text>
+              {goal.assists?.length > 0 && (
+                <Text style={styles.assists}>
+                  Assists: {goal.assists.map((a) => a.player).join(", ")}
+                </Text>
+              )}
             </View>
           ))
         ) : (
-          <Text style={styles.noData}>No stats available</Text>
+          <Text style={styles.noData}>No goals recorded</Text>
         )}
       </View>
     </View>
@@ -88,7 +113,7 @@ const styles = StyleSheet.create({
     width: "95%",
   },
   teamName: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
@@ -103,19 +128,46 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecef",
-    flexWrap: "wrap",
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 15,
     color: "#495057",
-    flexWrap: "wrap",
   },
   statValue: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "600",
     color: "#212529",
     textAlign: "right",
-    flexWrap: "wrap",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 16,
+    marginBottom: 6,
+    alignSelf: "flex-start",
+  },
+  goalsSection: {
+    width: "100%",
+    marginTop: 8,
+  },
+  goalItem: {
+    marginBottom: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e9ecef",
+  },
+  goalScorer: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  goalDetails: {
+    fontSize: 14,
+    color: "#6c757d",
+  },
+  assists: {
+    fontSize: 14,
+    color: "#495057",
+    marginTop: 2,
   },
   noData: {
     textAlign: "center",
