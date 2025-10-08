@@ -13,83 +13,86 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
   gameData,
   style,
 }) => {
-  if (
-    !team ||
-    !gameData ||
-    !gameData.currentStats ||
-    !gameData.currentStats.records
-  )
-    return null;
+  if (!team || !gameData) return null;
 
   const teamAbbr =
     team.abbreviation as keyof typeof gameData.currentStats.records;
-  const teamStats = gameData.currentStats.records[teamAbbr];
-  const teamData = gameData;
+
+  const combinedStats: Record<string, any> = {
+    ...(gameData.currentStats?.records?.[teamAbbr] || {}),
+    ...(gameData.currentStats?.standings?.[teamAbbr] || {}),
+    ...(gameData.currentStats?.streaks?.[teamAbbr] || {}),
+    ...(gameData.gameStats?.blocked && {
+      Blocked: gameData.gameStats.blocked[teamAbbr],
+    }),
+    ...(gameData.gameStats?.shots && {
+      Shots: gameData.gameStats.shots[teamAbbr],
+    }),
+    ...(gameData.gameStats?.hits && {
+      Hits: gameData.gameStats.hits[teamAbbr],
+    }),
+    ...(gameData.gameStats?.giveaways && {
+      Giveaways: gameData.gameStats.giveaways[teamAbbr],
+    }),
+    ...(gameData.gameStats?.takeaways && {
+      Takeaways: gameData.gameStats.takeaways[teamAbbr],
+    }),
+    ...(gameData.gameStats?.pim && {
+      PenaltyMinutes: gameData.gameStats.pim[teamAbbr],
+    }),
+    ...(gameData.gameStats?.faceOffWinPercentage && {
+      FaceoffWinPercent: `${gameData.gameStats.faceOffWinPercentage[teamAbbr]}%`,
+    }),
+    ...(gameData.gameStats?.powerPlay?.[teamAbbr] && {
+      PowerPlayGoals: gameData.gameStats.powerPlay[teamAbbr].goals,
+      PowerPlayOpportunities:
+        gameData.gameStats.powerPlay[teamAbbr].opportunities,
+      PowerPlayPercent: `${gameData.gameStats.powerPlay[teamAbbr].percentage}%`,
+    }),
+  };
+
+  const statsEntries = Object.entries(combinedStats);
 
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.teamName}>
         {team.locationName} {team.teamName}
       </Text>
+
       <View style={styles.statsGrid}>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Wins:</Text>
-          <Text style={styles.statValue}>{teamStats?.wins || "N/A"}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Losses:</Text>
-          <Text style={styles.statValue}>{teamStats?.losses || "N/A"}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Overtime:</Text>
-          <Text style={styles.statValue}>{teamStats?.ot || "N/A"}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Conference Rank:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.standings as any)?.[teamAbbr]
-              ?.conferenceRank ?? "N/A"}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Division Rank:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.standings as any)?.[teamAbbr]
-              ?.divisionRank || "N/A"}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>League Rank:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.standings as any)?.[teamAbbr]
-              ?.leagueRank || "N/A"}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>points From Playoff Spot:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.standings as any)?.[teamAbbr]
-              ?.pointsFromPlayoffSpot || "N/A"}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Streak Type:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.streaks as any)?.[teamAbbr]?.type ||
-              "N/A"}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Streak:</Text>
-          <Text style={styles.statValue}>
-            {(teamData?.currentStats?.streaks as any)?.[teamAbbr]?.count ||
-              "N/A"}
-          </Text>
-        </View>
+        {statsEntries.length > 0 ? (
+          statsEntries.map(([key, value]) => (
+            <View key={key} style={styles.statItem}>
+              <Text
+                style={styles.statLabel}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {formatLabel(key)}:
+              </Text>
+              <Text
+                style={styles.statValue}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+              >
+                {value ?? "N/A"}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noData}>No stats available</Text>
+        )}
       </View>
     </View>
   );
 };
+
+const formatLabel = (key: string) =>
+  key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase())
+    .trim();
 
 const styles = StyleSheet.create({
   container: {
@@ -99,11 +102,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
     borderRadius: 8,
     margin: 8,
+    width: "95%",
   },
   teamName: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 12,
     textAlign: "center",
   },
   statsGrid: {
@@ -113,19 +117,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecef",
+    flexWrap: "wrap",
   },
   statLabel: {
-    fontSize: 16,
-    fontWeight: "400",
+    fontSize: 15,
     color: "#495057",
+    flexShrink: 1,
+    flexBasis: "60%",
   },
   statValue: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#212529",
+    textAlign: "right",
+    flexShrink: 1,
+    flexBasis: "35%",
+  },
+  noData: {
+    textAlign: "center",
+    color: "#868e96",
+    marginTop: 8,
   },
 });
 
