@@ -18,40 +18,42 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
   const teamAbbr =
     team.abbreviation as keyof typeof gameData.currentStats.records;
 
+  // 🧠 Build combined stats, but preserve context for nested structures
+  const records = gameData.currentStats?.records?.[teamAbbr] || {};
+  const standings = gameData.currentStats?.standings?.[teamAbbr] || {};
+  const streak = gameData.currentStats?.streaks?.[teamAbbr] || {};
+  const stats = gameData.gameStats || {};
+
   const combinedStats: Record<string, any> = {
-    ...(gameData.currentStats?.records?.[teamAbbr] || {}),
-    ...(gameData.currentStats?.standings?.[teamAbbr] || {}),
-    ...(gameData.currentStats?.streaks?.[teamAbbr] || {}),
-    ...(gameData.gameStats?.blocked && {
-      Blocked: gameData.gameStats.blocked[teamAbbr],
-    }),
-    ...(gameData.gameStats?.shots && {
-      Shots: gameData.gameStats.shots[teamAbbr],
-    }),
-    ...(gameData.gameStats?.hits && {
-      Hits: gameData.gameStats.hits[teamAbbr],
-    }),
-    ...(gameData.gameStats?.giveaways && {
-      Giveaways: gameData.gameStats.giveaways[teamAbbr],
-    }),
-    ...(gameData.gameStats?.takeaways && {
-      Takeaways: gameData.gameStats.takeaways[teamAbbr],
-    }),
-    ...(gameData.gameStats?.pim && {
-      PenaltyMinutes: gameData.gameStats.pim[teamAbbr],
-    }),
-    ...(gameData.gameStats?.faceOffWinPercentage && {
-      FaceoffWinPercent: `${gameData.gameStats.faceOffWinPercentage[teamAbbr]}%`,
-    }),
-    ...(gameData.gameStats?.powerPlay?.[teamAbbr] && {
-      PowerPlayGoals: gameData.gameStats.powerPlay[teamAbbr].goals,
-      PowerPlayOpportunities:
-        gameData.gameStats.powerPlay[teamAbbr].opportunities,
-      PowerPlayPercent: `${gameData.gameStats.powerPlay[teamAbbr].percentage}%`,
-    }),
+    Wins: records.wins,
+    Losses: records.losses,
+    Overtime: records.ot,
+    "Conference Rank": standings.conferenceRank,
+    "Division Rank": standings.divisionRank,
+    "League Rank": standings.leagueRank,
+    "Points From Playoff Spot": standings.pointsFromPlayoffSpot,
+    Streak:
+      streak.type && streak.count ? `${streak.count} ${streak.type}` : "N/A",
+    Blocked: stats.blocked?.[teamAbbr],
+    Shots: stats.shots?.[teamAbbr],
+    Hits: stats.hits?.[teamAbbr],
+    Giveaways: stats.giveaways?.[teamAbbr],
+    Takeaways: stats.takeaways?.[teamAbbr],
+    "Penalty Minutes": stats.pim?.[teamAbbr],
+    "Faceoff Win %": stats.faceOffWinPercentage?.[teamAbbr]
+      ? `${stats.faceOffWinPercentage[teamAbbr]}%`
+      : "N/A",
+    "Power Play Goals": stats.powerPlay?.[teamAbbr]?.goals,
+    "Power Play Opportunities": stats.powerPlay?.[teamAbbr]?.opportunities,
+    "Power Play %": stats.powerPlay?.[teamAbbr]?.percentage
+      ? `${stats.powerPlay[teamAbbr].percentage}%`
+      : "N/A",
   };
 
-  const statsEntries = Object.entries(combinedStats);
+  // 🧹 Filter out empty or null values
+  const statsEntries = Object.entries(combinedStats).filter(
+    ([, value]) => value !== undefined && value !== null && value !== ""
+  );
 
   return (
     <View style={[styles.container, style]}>
@@ -63,21 +65,8 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
         {statsEntries.length > 0 ? (
           statsEntries.map(([key, value]) => (
             <View key={key} style={styles.statItem}>
-              <Text
-                style={styles.statLabel}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {formatLabel(key)}:
-              </Text>
-              <Text
-                style={styles.statValue}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.8}
-              >
-                {value ?? "N/A"}
-              </Text>
+              <Text style={styles.statLabel}>{key}:</Text>
+              <Text style={styles.statValue}>{String(value)}</Text>
             </View>
           ))
         ) : (
@@ -87,12 +76,6 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
     </View>
   );
 };
-
-const formatLabel = (key: string) =>
-  key
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim();
 
 const styles = StyleSheet.create({
   container: {
@@ -105,7 +88,7 @@ const styles = StyleSheet.create({
     width: "95%",
   },
   teamName: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
@@ -116,25 +99,23 @@ const styles = StyleSheet.create({
   statItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#e9ecef",
     flexWrap: "wrap",
   },
   statLabel: {
-    fontSize: 15,
+    fontSize: 13,
     color: "#495057",
-    flexShrink: 1,
-    flexBasis: "60%",
+    flexWrap: "wrap",
   },
   statValue: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "600",
     color: "#212529",
     textAlign: "right",
-    flexShrink: 1,
-    flexBasis: "35%",
+    flexWrap: "wrap",
   },
   noData: {
     textAlign: "center",
