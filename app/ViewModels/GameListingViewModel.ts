@@ -1,12 +1,13 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useRef, useState } from "react";
-import { getTodaysWatchInfo } from "../DataManager/DataManager";
+import useNHLDataManager from "../DataManager/DataManager";
 import { Broadcast, NHLGameListing } from "../Models/NHLGameListing";
 
 const useGameListingViewModel = () =>{
     const isFocused = useIsFocused();
     const [gameListings, setGameListings] = useState<NHLGameListing | null>(null);
     const fetchedRef = useRef(false);
+    const { getTodaysWatchInfo } = useNHLDataManager();
 
     const getListings = () =>{
         if ((isFocused && !fetchedRef.current) || gameListings === null) {

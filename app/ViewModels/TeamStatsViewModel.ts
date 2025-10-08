@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { GameType } from "../Models/Enums";
 import { NHLTeamStats } from "../Models/NHLTeamStats";
 
-const useTeamStatsViewModel =(data?: NHLTeamStats)=>{
+const useTeamStatsViewModel = (data?: NHLTeamStats) => {
     const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const stats = data;

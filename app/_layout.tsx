@@ -40,6 +40,13 @@ export default function RootLayout() {
               headerBackTitle: "Back",
             })}
           />
+          <Stack.Screen
+            name="Screens/GameDataScreen"
+            options={({ route }: any) => ({
+              title: route?.params?.title ?? "Game Data",
+              headerBackTitle: "Back",
+            })}
+          />
         </Stack>
         <StatusBar style="auto" />
       </PopupProvider>

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,6 +25,7 @@ export default function TabTwoScreen() {
     isFocused,
     scrollViewRef,
     searchText,
+    isLoading,
   } = useExploreViewModel();
 
   useEffect(() => {
@@ -32,6 +34,7 @@ export default function TabTwoScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <ActivityIndicator hidesWhenStopped={true} animating={isLoading} />
       <View style={styles.searchField}>
         <TextInput
           style={styles.input}

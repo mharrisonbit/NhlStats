@@ -2,7 +2,7 @@ import usePopup from "@/components/ui/usePopup";
 import { useIsFocused } from "@react-navigation/native";
 import { useRef, useState } from "react";
 import { ScrollView } from "react-native";
-import { getGlossaryInfo } from "../DataManager/DataManager";
+import useNHLDataManager from "../DataManager/DataManager";
 import { NHLGlossary } from "../Models/NHLGlossary";
 
 const useExploreViewModel = () =>{
@@ -13,6 +13,7 @@ const useExploreViewModel = () =>{
     const { showPopup } = usePopup();
     const scrollViewRef = useRef<ScrollView>(null);
     const isFocused = useIsFocused();
+    const { getGlossaryInfo, isLoading } = useNHLDataManager();
 
 
     const getData = () => {
@@ -40,22 +41,24 @@ const useExploreViewModel = () =>{
         if (results?.length === 0) {
           alert("No results found.");
         } else {
-          const result = results[0];
-          let foundItemIndex = glossary?.data?.findIndex(
-            (i: any) => i.id === result.id
-          );
-          if (foundItemIndex !== -1 && scrollViewRef.current) {
-            scrollViewRef.current.scrollTo({
-              y: foundItemIndex * 28, // Assuming each item is approximately 40px tall
-              animated: true,
+          const result = results?.[0];
+          if (result) {
+            let foundItemIndex = glossary?.data?.findIndex(
+              (i: any) => i.id === result.id
+            );
+            if (foundItemIndex !== undefined && foundItemIndex !== -1 && scrollViewRef.current) {
+              scrollViewRef.current.scrollTo({
+                y: foundItemIndex * 28, // Assuming each item is approximately 40px tall
+                animated: true,
+              });
+            }
+            showPopup({
+              title: `${result.abbreviation} • ${result.fullName}`,
+              message: result.definition,
+              buttons: [{ text: "Close" }],
             });
+            onChangeText("");
           }
-          showPopup({
-            title: `${result.abbreviation} • ${result.fullName}`,
-            message: result.definition,
-            buttons: [{ text: "Close" }],
-          });
-          onChangeText("");
         }
       };
 
@@ -68,6 +71,7 @@ const useExploreViewModel = () =>{
         isFocused,
         scrollViewRef,
         searchText,
+        isLoading,
       };
 
     }
