@@ -4,14 +4,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
 import { ThemedView } from "@/components/themed-view";
+import InputWithButton from "@/components/ui/InputWithButton";
 import Separator from "@/components/ui/Separator";
-import TrackerButton from "@/components/ui/TrackerButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useExploreViewModel from "../ViewModels/ExploreViewModel";
 
@@ -36,17 +35,15 @@ export default function TabTwoScreen() {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ActivityIndicator hidesWhenStopped={true} animating={isLoading} />
       <View style={styles.searchField}>
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeText}
+        <InputWithButton
           value={searchText}
-        />
-        <TrackerButton
-          buttonStyle={styles.searchButton}
-          title="search"
+          onChangeText={onChangeText}
           onPress={() => {
             searchGlossary(searchText);
           }}
+          placeholder="Ctry"
+          buttonTitle="search"
+          disabled={isLoading}
         />
       </View>
       <ScrollView

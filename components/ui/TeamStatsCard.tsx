@@ -82,8 +82,8 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({
               <Text style={styles.goalScorer}>
                 {goal.scorer.player}{" "}
                 <Text style={styles.goalDetails}>
-                  (Period {goal.period}, {goal.min}:
-                  {goal.sec.toString().padStart(2, "0")}
+                  (Period {goal.period ?? "?"}, {String(goal.min ?? "0")}:
+                  {String(goal.sec ?? "00").padStart(2, "0")}
                   {goal.strength ? `, ${goal.strength}` : ""})
                 </Text>
               </Text>

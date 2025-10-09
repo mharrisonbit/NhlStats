@@ -14,6 +14,7 @@ const useScoresViewModel = () => {
     const { isLoading, getTodaysScores, getScoresForDate } = useNHLDataManager();
     const [ gameScores, setScores ] = useState<Scores[]>([]);
     const [ dateString, setDateString ] = useState("");
+    const [ dateForDisplay, setDateForDisplay ] = useState("");
     
     const getScores = async () => {
         setScores([]);
@@ -24,10 +25,13 @@ const useScoresViewModel = () => {
     const getScoresByDate = async() => {
         setScores([]);
         if(isNullOrWhiteSpace(dateString)){
+            const date = new Date();
+            const formattedDate = date.toISOString().substring(0, 10);
+            setDateForDisplay(formattedDate);
             await getScores();
             return;
         }
-        
+        setDateForDisplay(dateString);
         let results = await getScoresForDate(dateString);
         setDateString("");
         setScores(results);
@@ -65,6 +69,7 @@ const useScoresViewModel = () => {
         isLoading,
         gameScores,
         dateString,
+        dateForDisplay,
     ]
 }
 

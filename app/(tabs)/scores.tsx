@@ -21,6 +21,7 @@ export default function scores() {
     isLoading,
     gameScores,
     dateString,
+    dateForDisplay,
   ] = useScoresViewModel() as [
     () => Promise<Scores[]>,
     (dateString: string) => string,
@@ -28,6 +29,7 @@ export default function scores() {
     (value: string) => void,
     boolean,
     Scores[],
+    string,
     string
   ];
   return (
@@ -42,6 +44,11 @@ export default function scores() {
             buttonTitle="Get Scores"
             disabled={isLoading}
           />
+          <Text
+            style={{ alignSelf: "center", fontWeight: "bold", fontSize: 20 }}
+          >
+            {dateForDisplay}
+          </Text>
           <View>
             {gameScores.length >= 1 &&
               gameScores?.map((scoresData, scoresIndex) =>
